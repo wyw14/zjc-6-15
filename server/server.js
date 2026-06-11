@@ -49,7 +49,7 @@ app.post('/api/score', (req, res) => {
 
   leaderboard.push(entry);
   if (leaderboard.length > 100) {
-    leaderboard = leaderboard.slice(0, 100);
+    leaderboard = leaderboard.slice(-100);
   }
 
   const sortedByTime = [...leaderboard].sort((a, b) => a.time - b.time);
@@ -80,5 +80,5 @@ app.get('/api/leaderboard', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`鏈嶅姟鍣ㄨ繍琛屽湪 http://localhost:${PORT}`);
+  console.log(`服务器运行在 http://localhost:${PORT}`);
 });

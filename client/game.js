@@ -72,7 +72,7 @@ async function fetchShuffledCards() {
     const data = await response.json();
     return data.cards;
   } catch (error) {
-    console.error('鑾峰彇娲楃墝鏁版嵁澶辫触:', error);
+    console.error('获取洗牌数据失败:', error);
     const fallbackCards = [];
     for (let i = 1; i <= 8; i++) {
       fallbackCards.push(i, i);
@@ -97,7 +97,7 @@ function renderCards(cardIds) {
     
     const cardFront = document.createElement('div');
     cardFront.className = 'card-face card-front';
-    cardFront.textContent = CARD_EMOJIS[cardId] || '鉂?;
+    cardFront.textContent = CARD_EMOJIS[cardId] || '❓';
     
     card.appendChild(cardBack);
     card.appendChild(cardFront);
@@ -217,13 +217,13 @@ async function submitScore() {
     const data = await response.json();
     
     if (data.success) {
-      alert(`鎭枩锛佷綘鎺掑悕绗?${data.rank} 鍚嶏紒`);
+      alert(`恭喜！你排名第 ${data.rank} 名！`);
       winModal.classList.add('hidden');
       showLeaderboard();
     }
   } catch (error) {
-    console.error('鎻愪氦鎴愮哗澶辫触:', error);
-    alert('鎻愪氦鎴愮哗澶辫触锛岃绋嶅悗閲嶈瘯');
+    console.error('提交成绩失败:', error);
+    alert('提交成绩失败，请稍后重试');
   }
 }
 
