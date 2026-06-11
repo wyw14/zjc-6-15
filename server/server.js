@@ -1,4 +1,4 @@
-﻿const express = require('express');
+﻿﻿const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
@@ -31,34 +31,52 @@ app.get('/api/shuffle', (req, res) => {
 });
 
 app.post('/api/score', (req, res) => {
-  const { time, playerName } = req.body;
-  
+  const { time, playerName, steps, accuracy } = req.body;
+
   if (typeof time !== 'number' || time <= 0) {
-    return res.status(400).json({ error: '鏃犳晥鐨勬垚缁╂暟鎹? });
+    return res.status(400).json({ error: '无效的成绩数据' });
   }
 
   const entry = {
     id: Date.now(),
     time: time,
-    playerName: playerName || '鍖垮悕鐜╁',
-    date: new Date().toLocaleString('zh-CN')
+    steps: typeof steps === 'number' ? steps : 0,
+    accuracy: typeof accuracy === 'number' ? accuracy : 0,
+    playerName: playerName || '匿名玩家',
+    date: new Date().toLocaleString('zh-CN'),
+    timestamp: Date.now()
   };
 
   leaderboard.push(entry);
-  leaderboard.sort((a, b) => a.time - b.time);
-  leaderboard = leaderboard.slice(0, 10);
+  if (leaderboard.length > 100) {
+    leaderboard = leaderboard.slice(0, 100);
+  }
 
-  const rank = leaderboard.findIndex(e => e.id === entry.id) + 1;
+  const sortedByTime = [...leaderboard].sort((a, b) => a.time - b.time);
+  const rank = sortedByTime.findIndex(e => e.id === entry.id) + 1;
 
   res.json({
     success: true,
     rank: rank,
-    leaderboard: leaderboard
+    leaderboard: sortedByTime.slice(0, 10)
   });
 });
 
+const SORT_CONFIG = {
+  time: { key: 'time', dir: 'asc' },
+  steps: { key: 'steps', dir: 'asc' },
+  accuracy: { key: 'accuracy', dir: 'desc' },
+  date: { key: 'timestamp', dir: 'desc' }
+};
+
 app.get('/api/leaderboard', (req, res) => {
-  res.json({ leaderboard: leaderboard });
+  const sort = req.query.sort || 'time';
+  const config = SORT_CONFIG[sort] || SORT_CONFIG.time;
+  const sorted = [...leaderboard].sort((a, b) => {
+    if (config.dir === 'asc') return a[config.key] - b[config.key];
+    return b[config.key] - a[config.key];
+  });
+  res.json({ leaderboard: sorted.slice(0, 10), sort: sort });
 });
 
 app.listen(PORT, () => {

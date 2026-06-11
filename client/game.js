@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = 'http://localhost:6044/api';
+﻿﻿const API_BASE_URL = 'http://localhost:6044/api';
 
 const CARD_EMOJIS = {
   1: '馃惗',
@@ -26,6 +26,9 @@ const submitScoreBtn = document.getElementById('submitScoreBtn');
 const playAgainBtn = document.getElementById('playAgainBtn');
 const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
 const leaderboardList = document.getElementById('leaderboardList');
+const sortBtns = document.querySelectorAll('.sort-btn');
+
+let currentSort = 'time';
 
 let cards = [];
 let flippedCards = [];
@@ -193,8 +196,9 @@ function endGame() {
 }
 
 async function submitScore() {
-  const playerName = playerNameInput.value.trim() || '鍖垮悕鐜╁';
+  const playerName = playerNameInput.value.trim() || '匿名玩家';
   const timeInSeconds = Math.floor(elapsedTime / 1000);
+  const accuracy = moves > 0 ? Math.round((8 / moves) * 100) : 0;
 
   try {
     const response = await fetch(`${API_BASE_URL}/score`, {
@@ -204,7 +208,9 @@ async function submitScore() {
       },
       body: JSON.stringify({
         time: timeInSeconds,
-        playerName: playerName
+        playerName: playerName,
+        steps: moves,
+        accuracy: accuracy
       })
     });
 
@@ -223,41 +229,56 @@ async function submitScore() {
 
 async function showLeaderboard() {
   try {
-    const response = await fetch(`${API_BASE_URL}/leaderboard`);
+    const response = await fetch(`${API_BASE_URL}/leaderboard?sort=${currentSort}`);
     const data = await response.json();
-    renderLeaderboard(data.leaderboard);
+    renderLeaderboard(data.leaderboard, currentSort);
   } catch (error) {
-    console.error('鑾峰彇鎺掕姒滃け璐?', error);
-    leaderboardList.innerHTML = '<li>鍔犺浇鎺掕姒滃け璐?/li>';
+    console.error('获取排行榜失败:', error);
+    leaderboardList.innerHTML = '<li>加载排行榜失败</li>';
   }
   
   leaderboardModal.classList.remove('hidden');
 }
 
-function renderLeaderboard(leaderboard) {
+function renderLeaderboard(leaderboard, sortBy) {
   if (!leaderboard || leaderboard.length === 0) {
-    leaderboardList.innerHTML = '<li class="empty-message">鏆傛棤璁板綍锛屽揩鏉ユ寫鎴樺惂锛?/li>';
+    leaderboardList.innerHTML = '<li class="empty-message">暂无记录，快来挑战吧！</li>';
     return;
   }
 
   leaderboardList.innerHTML = '';
-  
+
   leaderboard.forEach((entry, index) => {
     const li = document.createElement('li');
     li.className = 'rank-item';
-    
+
     const minutes = Math.floor(entry.time / 60);
     const seconds = entry.time % 60;
     const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    
+
+    let metricHtml = '';
+    switch (sortBy) {
+      case 'steps':
+        metricHtml = `<span class="metric">${entry.steps} 步</span>`;
+        break;
+      case 'accuracy':
+        metricHtml = `<span class="metric">${entry.accuracy}%</span>`;
+        break;
+      case 'date':
+        metricHtml = `<span class="metric">${entry.date}</span>`;
+        break;
+      default:
+        metricHtml = `<span class="metric">${timeStr}</span>`;
+    }
+
     li.innerHTML = `
       <span class="rank-name">
         <span class="rank">#${index + 1}</span>
         <span class="name">${entry.playerName}</span>
       </span>
-      <span class="time">${timeStr}</span>
+      ${metricHtml}
     `;
-    
+
     leaderboardList.appendChild(li);
   });
 }
@@ -272,5 +293,14 @@ closeLeaderboardBtn.addEventListener('click', () => {
   leaderboardModal.classList.add('hidden');
 });
 submitScoreBtn.addEventListener('click', submitScore);
+
+sortBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentSort = btn.dataset.sort;
+    sortBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    showLeaderboard();
+  });
+});
 
 initGame();

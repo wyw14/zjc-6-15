@@ -262,9 +262,40 @@ h1 {
   gap: 10px;
 }
 
-.leaderboard-list .time {
+.leaderboard-list .time,
+.leaderboard-list .metric {
   font-weight: bold;
   color: #667eea;
+}
+
+.sort-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.sort-btn {
+  padding: 6px 12px;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  color: #666;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sort-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.sort-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
 }
 
 @media (max-width: 480px) {

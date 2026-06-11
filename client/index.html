@@ -49,6 +49,12 @@
     <div id="leaderboardModal" class="modal hidden">
       <div class="modal-content">
         <h2>🏆 排行榜</h2>
+        <div class="sort-tabs">
+          <button class="sort-btn active" data-sort="time">⏱️ 最快用时</button>
+          <button class="sort-btn" data-sort="steps">👆 最少步数</button>
+          <button class="sort-btn" data-sort="accuracy">🎯 最高准确率</button>
+          <button class="sort-btn" data-sort="date">🕐 最近完成</button>
+        </div>
         <ol id="leaderboardList" class="leaderboard-list"></ol>
         <button id="closeLeaderboardBtn" class="btn btn-secondary">关闭</button>
       </div>
